@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { AuthContext } from '../App';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 
@@ -9,6 +9,14 @@ const Login = () => {
   const { login, authMessage, setAuthMessage } = useContext(AuthContext);
   const navigate = useNavigate();
   const location = useLocation();
+
+  useEffect(() => {
+    // Reset hover effects or any lingering styles when navigating to this page
+    const links = document.querySelectorAll('a');
+    links.forEach((link) => {
+      link.classList.remove('hover');
+    });
+  }, []);
 
   const validate = () => {
     const nextErrors = {};
@@ -36,11 +44,17 @@ const Login = () => {
       return;
     }
 
+    // Simulate login
+    localStorage.setItem('isLoggedIn', 'true');
     login({ email: email.trim() });
     setAuthMessage('');
 
+    // Redirect to dashboard or homepage
     const redirectPath = location.state?.from || '/student-portal';
     navigate(redirectPath, { replace: true });
+
+    // Trigger UI update
+    window.dispatchEvent(new Event('storage'));
   };
 
   return (

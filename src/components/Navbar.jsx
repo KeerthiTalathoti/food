@@ -9,7 +9,11 @@ const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
-  const { isAuthenticated, logout, user } = useContext(AuthContext);
+
+  // Simulated authentication state
+  const [isAuthenticated, setIsAuthenticated] = useState(
+    localStorage.getItem('isLoggedIn') === 'true'
+  );
 
   useEffect(() => {
     const handleScroll = () => {
@@ -19,16 +23,33 @@ const Navbar = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  useEffect(() => {
+    const handleStorageChange = () => {
+      setIsAuthenticated(localStorage.getItem('isLoggedIn') === 'true');
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, []);
+
   const navLinks = [
     { name: 'Portal', path: '/student-portal', icon: ShoppingCart },
     { name: 'My Orders', path: '/orders', icon: History },
     { name: 'Donations', path: '/donations', icon: Heart },
     { name: 'Dashboard', path: '/admin', icon: BarChart3 },
-    { name: 'About', path: '/about', icon: User },
   ];
 
+  const handleLogin = () => {
+    localStorage.setItem('isLoggedIn', 'true');
+    setIsAuthenticated(true);
+    navigate('/dashboard');
+  };
+
   const handleLogout = () => {
-    logout();
+    localStorage.removeItem('isLoggedIn');
+    setIsAuthenticated(false);
     setIsOpen(false);
     navigate('/login', { replace: true });
   };
@@ -54,7 +75,7 @@ const Navbar = () => {
 
           {/* Desktop Nav */}
           <div className="hidden md:flex items-center gap-1">
-            {navLinks.map((link) => (
+            {isAuthenticated && navLinks.map((link) => (
               <Link
                 key={link.path}
                 to={link.path}
@@ -64,23 +85,17 @@ const Navbar = () => {
                     : 'text-slate-600 hover:bg-emerald-50 hover:text-emerald-700'
                 }`}
               >
-                {/* <link.icon size={16} /> */}
                 {link.name}
               </Link>
             ))}
             <div className="h-6 w-px bg-slate-200 mx-2" />
             {isAuthenticated ? (
-              <>
-                <span className="px-4 py-2 text-sm font-medium text-slate-700">
-                  {user?.email}
-                </span>
-                <button
-                  onClick={handleLogout}
-                  className="px-4 py-2 rounded-full text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
-                >
-                  Logout
-                </button>
-              </>
+              <button
+                onClick={handleLogout}
+                className="px-4 py-2 rounded-full text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
+              >
+                Logout
+              </button>
             ) : (
               <>
                 <Link to="/login" className="px-4 py-2 rounded-full text-sm font-medium text-slate-600 hover:text-emerald-700 transition-colors">
@@ -114,7 +129,7 @@ const Navbar = () => {
           >
             <div className="glass rounded-3xl p-6 shadow-2xl border-white/40">
               <div className="flex flex-col gap-2">
-                {navLinks.map((link) => (
+                {isAuthenticated && navLinks.map((link) => (
                   <Link
                     key={link.path}
                     to={link.path}
@@ -125,8 +140,7 @@ const Navbar = () => {
                     }`}
                     onClick={() => setIsOpen(false)}
                   >
-                    <link.icon size={20} />
-                    <span className="font-semibold">{link.name}</span>
+                    {link.name}
                   </Link>
                 ))}
                 {isAuthenticated ? (

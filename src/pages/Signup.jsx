@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { AuthContext } from '../App';
 import { Link, useNavigate } from 'react-router-dom';
 
@@ -9,6 +9,14 @@ const Signup = () => {
   const [errors, setErrors] = useState({});
   const { login, authMessage, setAuthMessage } = useContext(AuthContext);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // Reset hover effects or any lingering styles when navigating to this page
+    const links = document.querySelectorAll('a');
+    links.forEach((link) => {
+      link.classList.remove('hover');
+    });
+  }, []);
 
   const validate = () => {
     const nextErrors = {};
